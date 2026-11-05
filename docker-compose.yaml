@@ -6,6 +6,7 @@ services:
     working_dir: /var/www/html
     volumes:
       - ./htdocs:/var/www/html
+    env_file: .env
     environment:
       APP_ENV: local
       DB_HOST: mysql
