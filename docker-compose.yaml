@@ -1,0 +1,103 @@
+services:
+  php:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    working_dir: /var/www/html
+    volumes:
+      - ./htdocs:/var/www/html
+    environment:
+      APP_ENV: local
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: app
+      DB_USERNAME: ${MYSQL_USER}
+      DB_PASSWORD: ${MYSQL_PASSWORD}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: app
+      RABBITMQ_PASSWORD: app_secret
+    depends_on:
+      mysql:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  caddy:
+    image: caddy:2-alpine
+    ports:
+      - "8080:80"
+      - "8443:443"
+    volumes:
+      - ./htdocs:/var/www/html:ro
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - php
+    networks:
+      - app-network
+
+  mysql:
+    image: mysql:8.4
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: app
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    volumes:
+      - ./databases:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p$${MYSQL_ROOT_PASSWORD} --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - app-network
+
+  phpmyadmin:
+    image: phpmyadmin:5-apache
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 0
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    restart: unless-stopped
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: app
+      RABBITMQ_DEFAULT_PASS: app_secret
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - app-network
+
+volumes:
+  caddy-data:
+  caddy-config:
+  rabbitmq-data:
+
+networks:
+  app-network:

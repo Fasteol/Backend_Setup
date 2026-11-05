@@ -1,0 +1,22 @@
+# Environment secrets
+.env
+.env.*
+!.env.example
+
+# MySQL data
+/databases/*
+!/databases/.gitkeep
+
+# htdocs data
+/htdocs/*
+!/htdocs/.gitkeep
+
+# Docker overrides and local files
+docker-compose.override.yml
+docker-compose.*.override.yml
+
+# Logs and temporary files
+*.log
+*.tmp
+*.swp
+.DS_Store
