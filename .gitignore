@@ -20,3 +20,6 @@ docker-compose.*.override.yml
 *.tmp
 *.swp
 .DS_Store
+
+databases/
+.env
