@@ -3,13 +3,9 @@
 .env.*
 !.env.example
 
-# MySQL data
+# MySQL data (data mentah + private key, jangan di-push)
 /databases/*
 !/databases/.gitkeep
-
-# htdocs data
-/htdocs/*
-!/htdocs/.gitkeep
 
 # Docker overrides and local files
 docker-compose.override.yml
@@ -20,6 +16,3 @@ docker-compose.*.override.yml
 *.tmp
 *.swp
 .DS_Store
-
-databases/
-.env
