@@ -4,8 +4,6 @@
 !.env.example
 
 # MySQL data (data mentah + private key, jangan di-push)
-/databases/*
-!/databases/.gitkeep
 
 # Docker overrides and local files
 docker-compose.override.yml
@@ -16,3 +14,7 @@ docker-compose.*.override.yml
 *.tmp
 *.swp
 .DS_Store
+
+# File socket MySQL (tidak bisa di-commit)
+databases/mysql.sock
+databases/mysql.sock.lock
